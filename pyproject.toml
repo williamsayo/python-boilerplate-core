@@ -10,14 +10,14 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = []
 
+[dependency-groups]
+dev = [
+    "pytest>=9.0.2",
+]
+
 [project.urls]
 "Source" = "https://github.com/williamsayo/"
 "Documentation" = "https://github.com/williamsayo/python-boilerplate-core#readme"
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=9.0.2",      # Unit testing framework
-]
 
 [tool.setuptools.packages.find]
 where = ["src"]
