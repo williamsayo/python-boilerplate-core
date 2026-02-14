@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=65.5.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "boilerplate-core"
+version = "0.1.0"
+description = "A minimal starter library providing immutable, type-safe utilities for Python that simplify error handling and reduce reliance on exceptions, featuring a Rust-inspired Result container."
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = []
+
+[project.urls]
+"Source" = "https://github.com/williamsayo/"
+"Documentation" = "https://github.com/williamsayo/python-boilerplate-core#readme"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=9.0.2",      # Unit testing framework
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
