@@ -1,5 +1,5 @@
 import unittest
-from result import (
+from result.utils.helpers import (
     result_ok,
     result_fail,
     result_equality,
@@ -7,7 +7,7 @@ from result import (
     value_or,
     unwrap_or,
 )
-from result import is_result, is_ok, is_fail
+from result.guards.base import is_result, is_ok, is_fail
 from result.base import Ok, Fail
 
 
