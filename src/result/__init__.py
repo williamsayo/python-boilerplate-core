@@ -1,5 +1,5 @@
-from .base import Fail, Ok, Result
-from .guards import is_ok, is_fail
+from .base import Fail as FailClass, Ok as OkClass, Result
+from .guards import is_ok, is_fail, is_result
 from .utils.helpers import (
     result_fail,
     result_ok,
@@ -14,12 +14,13 @@ from .types import Either, ResultCombine, Result, Ok, Fail
 
 __all__ = [
     # concrete classes
-    "Ok",
-    "Fail",
+    "OkClass",
+    "FailClass",
     "Result",
     # guards
     "is_ok",
     "is_fail",
+    "is_result",
     # helpers
     "result_fail",
     "result_ok",

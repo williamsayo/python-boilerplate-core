@@ -1,6 +1,6 @@
 from typing import TypeGuard, TypeIs
 from result.types.base import Either, Result, Ok, Fail
-from result.base import Result as ResultClass
+from result.base import _Result as ResultClass
 
 
 def is_result[T](result: T) -> TypeGuard[Result[T]]:

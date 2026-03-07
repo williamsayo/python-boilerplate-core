@@ -62,6 +62,8 @@ def result_fail[F](value: F) -> Fail[F]:
     Returns:
         Fail[F]: A Fail result containing the provided error value.
     """
+    if value is None:
+        raise ValueError('Fail value must be a valid and not None')
     return FailClass(value)
 
 
