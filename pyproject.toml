@@ -12,11 +12,16 @@ dev = [
 ]
 
 [project.urls]
-"Source" = "https://github.com/williamsayo/"
+"Source" = "https://github.com/williamsayo/python-boilerplate"
 "Documentation" = "https://github.com/williamsayo/python-boilerplate-core#readme"
 
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.backends.legacy:build"
+
 [tool.setuptools.packages.find]
-where = ["src/result"]
+where = ["src"]
 
 [tool.ty.rules]
 'invalid-argument-type' = 'ignore'
+
