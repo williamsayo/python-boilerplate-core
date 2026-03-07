@@ -1,7 +1,7 @@
 from typing import Literal, Iterator,Self
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
-from src.result.nothing import NothingType as Nothing
+from result.nothing import NothingType as Nothing
 
 
 class _Result[T](ABC):
@@ -54,9 +54,24 @@ class _Result[T](ABC):
             bool: True if equal, False otherwise.
         """
         ...
+    @abstractmethod
+    def __ne__(self, other: object) -> bool:
+        """
+        Compare this Result to another object for inequality.
+
+        Inequality should be based on:
+        - the Result variant (Ok vs Fail)
+        - the contained value
+
+        Args:
+            other (object): The object to compare against.
+        Returns:
+            bool: True if unequal, False otherwise.
+        """
+        ...
 
     @abstractmethod
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a developer-friendly string representation of the Result.
 
@@ -67,7 +82,7 @@ class _Result[T](ABC):
 
 
 @dataclass(frozen=True)
-class _Ok[S](_Result):
+class _Ok[S](_Result[S]):
     """
     Represents a successful Result.
 
@@ -78,7 +93,7 @@ class _Ok[S](_Result):
     """
 
     __match_args__ = ("value",)
-    value: S | None
+    value: S
 
     def __iter__(self) -> Iterator[S]:
         """
@@ -131,14 +146,14 @@ class _Ok[S](_Result):
         """
         return hash((True, self.value))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a developer-friendly string representation of Ok.
 
         Returns:
             str: A string representation of the Ok result.
         """
-        return f"<Ok({(self.value)})>"
+        return f"<Ok ({(self.value)})>"
 
     def isFail(self) -> Literal[False]:
         """
@@ -176,7 +191,7 @@ class _Ok[S](_Result):
 
 
 @dataclass(frozen=True)
-class _Fail[F](_Result):
+class _Fail[F](_Result[F]):
     """
     Represents a failed Result.
 
@@ -238,14 +253,14 @@ class _Fail[F](_Result):
         """
         return hash((True, self.value))
 
-    def __repr__(self):
+    def __repr__(self) -> str:
         """
         Return a developer-friendly string representation of Fail.
 
         Returns:
             str: A string representation of the Fail result.
         """
-        return f"<Fail({(self.value)})>"
+        return f"<Fail ({(self.value)})>"
 
     def isFail(self) -> Literal[True]:
         """

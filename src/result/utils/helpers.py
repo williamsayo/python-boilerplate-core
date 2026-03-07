@@ -1,11 +1,12 @@
-from src.result.base import Ok, Fail, Result as ResultInstance
-from src.result.types.base import Either, Result
-from src.result.nothing import Nothing, NothingType
-from src.result.guards import is_fail, is_ok
-from typing import List, Sequence
+from inspect import isclass
+from result.base import Ok as OkClass, Fail as FailClass, Result as ResultClass
+from result.types.base import Either, Ok, Fail, ResultCombine, Result
+from result.guards import is_fail
+from typing import List, Sequence, Callable, Any
+from functools import wraps, partial
 
 
-def result_equality[T, K](result: T, otherResult: K) -> bool:
+def result_equality(result: object, otherResult: object) -> bool:
     """
     Compare two Result objects for equality.
 
@@ -25,12 +26,17 @@ def result_equality[T, K](result: T, otherResult: K) -> bool:
         otherwise False.
     """
 
-    if isinstance(result, Ok) and isinstance(otherResult, Ok) or isinstance(result, Fail) and isinstance(otherResult, Fail):
+    if (
+        isinstance(result, OkClass)
+        and isinstance(otherResult, OkClass)
+        or isinstance(result, FailClass)
+        and isinstance(otherResult, FailClass)
+    ):
         return result.value == otherResult.value
     return False
 
 
-def result_ok[S](value: S | None = None) -> Ok[S]:
+def result_ok[S](value: S = None) -> Ok[S]:
     """
     Create an Ok result containing the provided value.
 
@@ -43,7 +49,7 @@ def result_ok[S](value: S | None = None) -> Ok[S]:
     Returns:
         Ok[S]: An Ok result containing the provided value.
     """
-    return Ok(value)
+    return OkClass(value)
 
 
 def result_fail[F](value: F) -> Fail[F]:
@@ -56,12 +62,12 @@ def result_fail[F](value: F) -> Fail[F]:
     Returns:
         Fail[F]: A Fail result containing the provided error value.
     """
-    return Fail(value)
+    return FailClass(value)
 
 
 def result_combine[S, F](
     results: Sequence[Either[S, F]],
-) -> Ok[List[S | None]] | Fail[F]:
+) -> ResultCombine[S, F]:
     """
     Combine a sequence of Result objects into a single Result.
 
@@ -77,17 +83,16 @@ def result_combine[S, F](
             - Ok(list_of_values) if all are Ok
             - Fail(error) if any Fail is found
     """
-    validResults: List[S | None] = []
+    validResults: List[S] = []
 
     for result in results:
-        value = result.value
         if is_fail(result):
             return result_fail(result.value)
-        validResults.append(value)
+        validResults.append(result.value)
     return result_ok(validResults)
 
 
-def value_or[T, K](result: Either[T, T], default: K) -> T | K | None:
+def value_or[T, K](result: Either[T, T], default: K) -> T | K:
     """
     Return the contained value from an Ok result, or a default value if Fail.
 
@@ -106,14 +111,14 @@ def value_or[T, K](result: Either[T, T], default: K) -> T | K | None:
             - Ok.value if the result is Ok
             - default if the result is Fail
     """
-    if not isinstance(result, ResultInstance):
+    if not isinstance(result, ResultClass):
         raise TypeError(f"Expected Result (Ok/Fail), got {repr(result)}")
     if not is_fail(result):
         return result.value
     return default
 
 
-def unwrap_or[T, E](result: ResultInstance[T], default: E) -> T | E:
+def unwrap_or[T, E](result: T, default: E) -> T | E:
     """
     Extract and return the raw value from a Result, or return a default value.
 
@@ -130,4 +135,57 @@ def unwrap_or[T, E](result: ResultInstance[T], default: E) -> T | E:
             - result.value if result is an Ok/Fail instance
             - default otherwise
     """
-    return result.value if isinstance(result, ResultInstance) else default
+    if isinstance(result, ResultClass):
+        return result.value
+    return default
+
+
+def as_result[S, T: Exception](
+    *exceptions: type[T],
+) -> Callable[[Callable[..., S]], Callable[..., Either[S, T]]]:
+    """
+    Decorator to convert exceptions into Fail results.
+
+    This decorator wraps a function and converts any specified exceptions it raises
+    into Fail results. If the function executes successfully, its return value is
+    wrapped in an Ok result.
+
+    Type Parameters:
+        ExcT: The exception type(s) to catch. Must be a subclass of Exception.
+        S: The return type of the decorated function.
+
+    Args:
+        *exceptions: One or more exception types to catch and convert to Fail.
+                    All must be subclasses of Exception.
+
+    Returns:
+        A decorator that transforms a function with return type S to return Either[S, ExcT].
+
+    Example:
+        >>> @as_result(ValueError, TypeError)
+        ... def parse_int(s: str) -> int:
+        ...     return int(s)
+        ...
+        >>> result = parse_int("123")  # Ok[int]
+        >>> error = parse_int("abc")   # Fail[ValueError]
+    """
+    if not exceptions or not all(
+        isclass(exception) and issubclass(exception, Exception)
+        for exception in exceptions
+    ):
+        raise ValueError("At least one exception type must be provided to as_result.")
+
+    def decorator(func: Callable[..., S]) -> Callable[..., Either[S, T]]:
+        @wraps(func)
+        def wrapper(*args: Any, **kwargs: Any) -> Either[S, T]:
+            try:
+                return result_ok(func(*args, **kwargs))
+            except exceptions as exception:
+                return result_fail(exception)  # type: ignore
+
+        return wrapper
+
+    return decorator
+
+
+as_result_all = partial(as_result, Exception)

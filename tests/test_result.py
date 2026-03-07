@@ -1,7 +1,15 @@
 import unittest
-from src.result.utils.helpers import result_ok, result_fail,result_equality,result_combine,value_or,unwrap_or
+from src.result.utils.helpers import (
+    result_ok,
+    result_fail,
+    result_equality,
+    result_combine,
+    value_or,
+    unwrap_or,
+)
 from src.result.guards.base import is_result, is_ok, is_fail
 from src.result.base import Ok, Fail
+
 
 class TestResult(unittest.TestCase):
     def test_result_ok_with_value(self) -> None:
@@ -51,7 +59,7 @@ class TestResult(unittest.TestCase):
         and raises TypeError when passed a non result object.
         """
         result = result_ok(2)
-        failed_result = result_fail('error')
+        failed_result = result_fail("error")
         default_value = 5
 
         self.assertEqual(value_or(result, default_value), result.value)
@@ -65,11 +73,11 @@ class TestResult(unittest.TestCase):
         and returns the default value when passed None.
         """
         result = result_ok(2)
-        failed_result = result_fail('error')
+        failed_result = result_fail("error")
         default_value = 5
 
         self.assertEqual(unwrap_or(result, default_value), 2)
-        self.assertEqual(unwrap_or(failed_result, default_value), 'error')
+        self.assertEqual(unwrap_or(failed_result, default_value), "error")
         self.assertEqual(unwrap_or(None, default_value), default_value)
 
     def test_result_equality(self) -> None:
@@ -80,9 +88,9 @@ class TestResult(unittest.TestCase):
         result1 = result_ok(2)
         result2 = result_ok(2)
         result3 = result_ok(3)
-        failed_result1 = result_fail('error')
-        failed_result2 = result_fail('error')
-        failed_result3 = result_fail('error3')
+        failed_result1 = result_fail("error")
+        failed_result2 = result_fail("error")
+        failed_result3 = result_fail("error3")
 
         self.assertTrue(result1 == result2)
         self.assertFalse(result1 == result3)
@@ -120,6 +128,29 @@ class TestResult(unittest.TestCase):
         self.assertTrue(result.isFail())
         self.assertFalse(is_ok(result))
         self.assertFalse(result.isOk())
+
+
+class TestResultPatternMatching(unittest.TestCase):
+    def test_pattern_matching_on_result_ok(self) -> None:
+        """
+        Ensure pattern matching on Ok and Fail results correctly extracts values
+        and that non result objects do not match.
+        """
+        result = result_ok(2)
+        match result:
+            case Ok(value):
+                self.assertEqual(value, 2)
+            case Fail(value):
+                self.fail("Expected an Ok result, got Fail.")
+
+    def test_pattern_matching_on_result_fail(self) -> None:
+        failed_result = result_fail("error")
+        match failed_result:
+            case Fail(error):
+                self.assertEqual(error, "error")
+            case Ok(value):
+                self.fail("Expected a Fail result, got Ok.")
+
 
 if __name__ == "__main__":
     unittest.main()
