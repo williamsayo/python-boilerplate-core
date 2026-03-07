@@ -13,6 +13,8 @@ class _Result[T](ABC):
 
     This base class defines the required interface for Result variants.
     """
+    
+    value: T
 
     @abstractmethod
     def isFail(self) -> bool:
@@ -79,7 +81,7 @@ class _Result[T](ABC):
 
 
 @dataclass(frozen=True, slots=True)
-class _Ok[S](_Result[S]):
+class Ok[S](_Result[S]):
     """
     Represents a successful Result.
 
@@ -188,7 +190,7 @@ class _Ok[S](_Result[S]):
 
 
 @dataclass(frozen=True, slots=True)
-class _Fail[F](_Result[F]):
+class Fail[F](_Result[F]):
     """
     Represents a failed Result.
 
@@ -279,6 +281,4 @@ class _Fail[F](_Result[F]):
         return False
 
 
-Ok = _Ok
-Fail = _Fail
 Result = _Result
