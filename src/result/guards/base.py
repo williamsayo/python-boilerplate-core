@@ -1,9 +1,9 @@
 from typing import TypeGuard, TypeIs
-from result.types.base import Either, Result as ResultType, Ok, Fail
-from result.base import Result as ResultInstance
+from result.types.base import Either, Result, Ok, Fail
+from result.base import Result as ResultClass
 
 
-def is_result[T](result: T) -> TypeGuard[ResultType[T]]:
+def is_result[T](result: T) -> TypeGuard[Result[T]]:
     """
     Type guard to check if a value is a Result instance (Ok or Fail).
 
@@ -14,7 +14,7 @@ def is_result[T](result: T) -> TypeGuard[ResultType[T]]:
         TypeGuard[ResultInstance[T]]: True if `result` is an instance of Ok or Fail,
         otherwise False.
     """
-    return isinstance(result, ResultInstance)
+    return isinstance(result, ResultClass)
 
 
 def is_ok[S, F](result: Either[S, F]) -> TypeIs[Ok[S]]:
