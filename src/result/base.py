@@ -1,9 +1,13 @@
-from typing import Literal, Iterator
+from typing import Literal, Iterator, Generic, TypeVar
 from dataclasses import dataclass
 from abc import ABC, abstractmethod
 
+S = TypeVar("S", covariant=True)
+F = TypeVar("F", covariant=True)
+T = TypeVar("T", covariant=True)
 
-class _Result[T](ABC):
+
+class _Result(ABC, Generic[T]):
     """
     Abstract base class representing a Result type.
 
@@ -13,7 +17,7 @@ class _Result[T](ABC):
 
     This base class defines the required interface for Result variants.
     """
-    
+
     value: T
 
     @abstractmethod
@@ -81,7 +85,7 @@ class _Result[T](ABC):
 
 
 @dataclass(frozen=True, slots=True)
-class Ok[S](_Result[S]):
+class Ok(_Result[S], Generic[S]):
     """
     Represents a successful Result.
 
@@ -190,7 +194,7 @@ class Ok[S](_Result[S]):
 
 
 @dataclass(frozen=True, slots=True)
-class Fail[F](_Result[F]):
+class Fail(_Result[F], Generic[F]):
     """
     Represents a failed Result.
 

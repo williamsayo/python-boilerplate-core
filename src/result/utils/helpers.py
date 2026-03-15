@@ -2,7 +2,7 @@ from inspect import isclass
 from result.base import Ok as OkClass, Fail as FailClass, Result as ResultClass
 from result.types.base import Either, Ok, Fail, ResultCombine
 from result.guards import is_fail
-from typing import List, Sequence, Callable, Any
+from typing import List, Sequence, Callable, Any, overload, Tuple
 from functools import wraps, partial
 
 
@@ -67,9 +67,37 @@ def result_fail[F](value: F) -> Fail[F]:
     return FailClass(value)
 
 
-def result_combine[S, F](
-    results: Sequence[Either[S, F]],
-) -> ResultCombine[S, F]:
+@overload
+def result_combine[S1, F](
+    results: Tuple[Either[S1, F]],
+) -> ResultCombine[Tuple[S1], F]: ...
+
+@overload
+def result_combine[S1, S2, F](
+    results: Tuple[Either[S1, F], Either[S2, F]],
+) -> ResultCombine[Tuple[S1, S2], F]: ...
+
+
+@overload
+def result_combine[S1, S2, S3, F](
+    results: Tuple[Either[S1, F], Either[S2, F], Either[S3, F]],
+) -> ResultCombine[Tuple[S1, S2, S3], F]: ...
+
+
+@overload
+def result_combine[S1, S2, S3, S4, F](
+    results: Tuple[Either[S1, F], Either[S2, F], Either[S3, F], Either[S4, F]],
+) -> ResultCombine[Tuple[S1, S2, S3, S4], F]: ...
+
+
+@overload
+def result_combine[S1, S2, S3, S4, S5, F](
+    results: Tuple[
+        Either[S1, F], Either[S2, F], Either[S3, F], Either[S4, F], Either[S5, F]
+    ],
+) -> ResultCombine[Tuple[S1, S2, S3, S4, S5], F]: ...
+
+def result_combine(results):
     """
     Combine a sequence of Result objects into a single Result.
 
@@ -85,13 +113,13 @@ def result_combine[S, F](
             - Ok(list_of_values) if all are Ok
             - Fail(error) if any Fail is found
     """
-    validResults: List[S] = []
+    validResults = []
 
     for result in results:
         if is_fail(result):
             return result_fail(result.value)
         validResults.append(result.value)
-    return result_ok(validResults)
+    return result_ok(tuple(validResults))
 
 
 def value_or[T, K](result: Either[T, T], default: K) -> T | K:
