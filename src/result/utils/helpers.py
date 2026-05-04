@@ -2,7 +2,7 @@ from inspect import isclass
 from result.base import Ok as OkClass, Fail as FailClass, Result as ResultClass
 from result.types.base import Either, Ok, Fail, ResultCombine
 from result.guards import is_fail
-from typing import List, Sequence, Callable, Any, overload, Tuple
+from typing import Sequence, Callable, Any, overload, Tuple, Unpack
 from functools import wraps, partial
 
 
@@ -63,7 +63,7 @@ def result_fail[F](value: F) -> Fail[F]:
         Fail[F]: A Fail result containing the provided error value.
     """
     if value is None:
-        raise ValueError('Fail value must be a valid and not None')
+        raise ValueError("Fail value must be a valid and not None")
     return FailClass(value)
 
 
@@ -71,6 +71,7 @@ def result_fail[F](value: F) -> Fail[F]:
 def result_combine[S1, F](
     results: Tuple[Either[S1, F]],
 ) -> ResultCombine[Tuple[S1], F]: ...
+
 
 @overload
 def result_combine[S1, S2, F](
@@ -96,6 +97,13 @@ def result_combine[S1, S2, S3, S4, S5, F](
         Either[S1, F], Either[S2, F], Either[S3, F], Either[S4, F], Either[S5, F]
     ],
 ) -> ResultCombine[Tuple[S1, S2, S3, S4, S5], F]: ...
+
+
+@overload
+def result_combine[*T, F](
+    results: Sequence[Either[T, F]],
+) -> ResultCombine[Tuple[Unpack[T]], F]: ...
+
 
 def result_combine(results):
     """
