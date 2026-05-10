@@ -94,9 +94,19 @@ def result_combine[S1, S2, S3, S4, F](
 @overload
 def result_combine[S1, S2, S3, S4, S5, F](
     results: Tuple[
-        Either[S1, F], Either[S2, F], Either[S3, F], Either[S4, F], Either[S5, F]
+        Either[S1, F],
+        Either[S2, F],
+        Either[S3, F],
+        Either[S4, F],
+        Either[S5, F],
     ],
 ) -> ResultCombine[Tuple[S1, S2, S3, S4, S5], F]: ...
+
+
+@overload
+def result_combine[S, F](
+    results: Tuple[Either[S, F], ...],
+) -> ResultCombine[Tuple[S, ...], F]: ...
 
 
 @overload
